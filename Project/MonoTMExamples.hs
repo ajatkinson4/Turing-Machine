@@ -116,3 +116,7 @@ ww =
       checkRight 6 '!' 7
 
 test2 = accepts ww "aa"
+
+----------------------------------------------------------------------
+-- recognize language { a + b = c | a, b, c in binary }
+
