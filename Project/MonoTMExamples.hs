@@ -21,6 +21,10 @@ tripletm =
 
 test = configs tripletm 35 "aabbcc"
 
+main = do 
+  let test = configs addtm 20 "1101+1101=1010"
+  print test
+
 ----------------------------------------------------------------------
 -- recognize language { ww | w in {a,b}* }
 ww =
@@ -117,7 +121,9 @@ ww =
 
 test2 = accepts ww "aa"
 
+
 ----------------------------------------------------------------------
+-- recognize {a+b=c | a,b,c in binary & +,=  }
 -- recognize binary strings of the form a+b=c where a + b = c
 additionTM =
   TM [1..14] "01+=" "01+*= " ' ' ' ' trans 1 [14]
