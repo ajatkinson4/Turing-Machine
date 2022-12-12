@@ -159,4 +159,4 @@ addtm =
       -- reject state (move to the left until the beginning of the input string is reached)
       loopLeft 8 "01+="
 
-test = configs addtm 35 "1101+1101=1010"
+test3 = configs addtm 35 "1101+1101=1010"
