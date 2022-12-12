@@ -126,44 +126,21 @@ test2 = accepts ww "aa"
 -- recognize {a+b=c | a,b,c in binary & +,=  }
 -- recognize binary strings of the form a+b=c where a + b = c
 addtm =
-  TM [1..14] "01+=" "01+*= " ' ' ' ' trans 1 [14]
+  TM [1 .. 8] "01+=" "01+* " ' ' '!' trans 1 [8]
   where
-    trans =
-      -- move right until the end of the input string
-      loopRight 1 "01+=" ++
+    trans = 
+      checkRight 1 ' ' 8 ++
+      goRight 1 '0' '0' 2 ++
+      goRight 1 '1' '1' 2 ++
+      loopRight 2 "01" ++
+      goRight 2 '+' '*' 3 ++
+      checkRight 3 ' ' 4 ++
+      loopRight 4 "01" ++
+      goRight 4 '=' '*' 5 ++
+      checkRight 5 ' ' 6 ++
+      loopRight 6 "01" ++
+      checkLeft 6 ' ' 7 ++
+      loopLeft 7 "01*" ++
+      checkRight 7 '!' 1
 
-      -- skip over the '=' symbol
-      goRight 1 '=' '*' 2 ++
-
-      -- move left until the '+' symbol is found
-      loopLeft 2 "01+=" ++
-      checkRight 2 '+' 3 ++
-
-      -- move right until the '=' symbol is found.
-      loopRight 3 "01+=" ++
-      checkRight 3 '=' 4 ++
-
-      -- move left until the '+' symbol is found
-      loopLeft 4 "01+=" ++
-      checkRight 4 '+' 5 ++
-
-      -- move right until the end of the input string
-      loopRight 5 "01+=" ++
-
-      -- check that the numbers on the left and right sides of the '+' symbol are equal
-      checkRight 5 '0' 6 ++
-      checkRight 5 '1' 7 ++
-
-      -- if the numbers on the left and right sides of the '+' symbol are equal, then move to the accepting state
-      goRight 6 '0' '*' 14 ++
-      goRight 7 '1' '*' 14 ++
-
-      -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
-      goRight 6 '1' '*' 8 ++
-      goRight 7 '0' '*' 8 ++
-
-      -- reject state (move to the left until the beginning of the input string is reached)
-      loopLeft 8 "01+="
-
-test3 = configs addtm 20 "1101+1101=1010"
-
+test3 = configs addtm 100 "1101+0110=10011"
