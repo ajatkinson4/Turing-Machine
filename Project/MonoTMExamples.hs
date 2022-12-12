@@ -22,7 +22,7 @@ tripletm =
 test = configs tripletm 35 "aabbcc"
 
 main = do 
-  let test = configs addtm 20 "1101+1101=1010"
+  let test = configs addtm 8 "1101+1101=1010"
   print test
 
 ----------------------------------------------------------------------
