@@ -21,6 +21,10 @@ tripletm =
 
 test = configs tripletm 35 "aabbcc"
 
+main = do 
+  let test = configs addtm 20 "1101+1101=1010"
+  print test
+
 ----------------------------------------------------------------------
 -- recognize language { ww | w in {a,b}* }
 ww =
@@ -117,7 +121,9 @@ ww =
 
 test2 = accepts ww "aa"
 
+
 ----------------------------------------------------------------------
+-- recognize {a+b=c | a,b,c in binary & +,=  }
 -- recognize binary strings of the form a+b=c where a + b = c
 addtm =
   TM [1..14] "01+=" "01+*= " ' ' ' ' trans 1 [14]
@@ -133,7 +139,7 @@ addtm =
       loopLeft 2 "01+=" ++
       checkRight 2 '+' 3 ++
 
-      -- move right until the '=' symbol is found
+      -- move right until the '=' symbol is found.
       loopRight 3 "01+=" ++
       checkRight 3 '=' 4 ++
 
@@ -154,9 +160,10 @@ addtm =
 
       -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
       goRight 6 '1' '*' 8 ++
-      goRight 7 '0' '*' 8
+      goRight 7 '0' '*' 8 ++
 
       -- reject state (move to the left until the beginning of the input string is reached)
       loopLeft 8 "01+="
 
-test3 = configs addtm 35 "1101+1101=1010"
+test3 = configs addtm 20 "1101+1101=1010"
+
