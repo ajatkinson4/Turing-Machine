@@ -22,7 +22,7 @@ tripletm =
 test = configs tripletm 35 "aabbcc"
 
 main = do 
-  let test = configs addtm 8 "1101+1101=1010"
+  let test = configs tripletm 35 "aabbcc"
   print test
 
 ----------------------------------------------------------------------
@@ -121,48 +121,76 @@ ww =
 
 test2 = accepts ww "aa"
 
-
 ----------------------------------------------------------------------
--- recognize {a+b=c | a,b,c in binary & +,=  }
--- recognize binary strings of the form a+b=c where a + b = c
-additionTM =
-  TM [1..14] "01+=" "01+*= " ' ' ' ' trans 1 [14]
-  where
-    trans =
-      -- move right until the end of the input string
-      loopRight 1 "01+=" ++
+addTM = TM [1 .. 10] "10+=" "10+=! " ' ' '!' trans 1 [10] 
 
-      -- skip over the '=' symbol
-      goRight 1 '=' '*' 2 ++
-
-      -- move left until the '+' symbol is found
-      loopLeft 2 "01+=" ++
-      checkRight 2 '+' 3 ++
-
-      -- move right until the '=' symbol is found
-      loopRight 3 "01+=" ++
-      checkRight 3 '=' 4 ++
-
-      -- move left until the '+' symbol is found
-      loopLeft 4 "01+=" ++
-      checkRight 4 '+' 5 ++
-
-      -- move right until the end of the input string
-      loopRight 5 "01+=" ++
-
-      -- check that the numbers on the left and right sides of the '+' symbol are equal
-      checkRight 5 '0' 6 ++
-      checkRight 5 '1' 7 ++
-
-      -- if the numbers on the left and right sides of the '+' symbol are equal, then move to the accepting state
-      goRight 6 '0' '*' 14 ++
-      goRight 7 '1' '*' 14 ++
-
-      -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
-      goRight 6 '1' '*' 8 ++
-      goRight 7 '0' '*' 8 ++
-
-      -- reject state (move to the left until the beginning of the input string is reached)
-      loopLeft 8 "01+="
-
-test3 = configs additionTM 35 "1101+1101=1010"
+  where 
+    trans = checkRight 1 ' ' 7 ++
+            loopRight 1 "10+=" ++
+            goRight 1 '1' '0' 2 ++
+            goRight 1 '0' '1' 3 ++
+            goRight 1 '+' '0' 4 ++
+            goRight 1 '=' '0' 5 ++
+            goRight 1 '!' '0' 6 ++
+            loopRight 2 "10+=" ++
+            goRight 2 '1' '1' 2 ++
+            goRight 2 '0' '0' 2 ++
+            goRight 2 '+' '1' 4 ++
+            goRight 2 '=' '1' 5 ++
+            goRight 2 '!' '1' 6 ++
+            loopRight 3 "10+=" ++
+            goRight 3 '1' '1' 3 ++
+            goRight 3 '0' '0' 3 ++
+            goRight 3 '+' '0' 4 ++
+            goRight 3 '=' '0' 5 ++
+            goRight 3 '!' '0' 6 ++
+            loopRight 4 "10+=" ++
+            goRight 4 '1' '1' 4 ++
+            goRight 4 '0' '0' 4 ++
+            goRight 4 '+' '0' 4 ++
+            goRight 4 '=' '0' 5 ++
+            goRight 4 '!' '0' 6 ++
+            loopRight 5 "10+=" ++
+            goRight 5 '1' '1' 5 ++
+            goRight 5 '0' '0' 5 ++
+            goRight 5 '+' '0' 4 ++
+            goRight 5 '=' '0' 5 ++
+            goRight 5 '!' '0' 6 ++
+            loopRight 6 "10+=" ++
+            goRight 6 '1' '1' 6 ++
+            goRight 6 '0' '0' 6 ++
+            goRight 6 '+' '0' 4 ++
+            goRight 6 '=' '0' 5 ++
+            goRight 6 '!' '0' 6 ++
+            loopLeft 4 "10+=" ++
+            goLeft 4 '1' '0' 2 ++
+            goLeft 4 '0' '1' 3 ++
+            goLeft 4 '+' '0' 4 ++
+            goLeft 4 '=' '0' 5 ++
+            goLeft 4 '!' '0' 6 ++
+            loopLeft 5 "10+=" ++
+            goLeft 5 '1' '0' 2 ++
+            goLeft 5 '0' '1' 3 ++
+            goLeft 5 '+' '0' 4 ++
+            goLeft 5 '=' '0' 5 ++
+            goLeft 5 '!' '0' 6 ++
+            loopLeft 6 "10+=" ++
+            goLeft 6 '1' '0' 2 ++
+            goLeft 6 '0' '1' 3 ++
+            goLeft 6 '+' '0' 4 ++
+            goLeft 6 '=' '0' 5 ++
+            goLeft 6 '!' '0' 6 ++
+            loopLeft 7 "10+=" ++
+            goLeft 7 '1' '0' 2 ++
+            goLeft 7 '0' '1' 3 ++
+            goLeft 7 '+' '0' 4 ++
+            goLeft 7 '=' '0' 5 ++
+            goLeft 7 '!' '0' 6 ++
+            checkRight 7 ' ' 7 ++
+            checkRight 7 '0' 7 ++
+            checkRight 7 '1' 7 ++
+            checkRight 7 '+' 7 ++
+            checkRight 7 '=' 7 ++
+            checkRight 7 '!' 7 ++
+            checkRight 7 '*' 7 ++
+            checkRight 7 '!' 7
