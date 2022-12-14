@@ -7,23 +7,19 @@ import MonoTM
 tripletm =
   TM [1 .. 6] "abc" "abc*! " ' ' '!' trans 1 [6]
   where
-    trans = checkRight 1 ' ' 6 ++
-            loopRight 1 "*" ++
-            goRight 1 'a' '*' 2 ++
-            loopRight 2 "a*" ++
-            goRight 2 'b' '*' 3 ++
-            loopRight 3 "b*" ++
-            goRight 3 'c' '*' 4 ++
-            loopRight 4 "c*" ++
-            checkLeft 4 ' ' 5 ++
-            loopLeft 5 "abc*" ++
-            checkRight 5 '!' 1 
+    trans = checkRight 1 ' ' 6 ++   -- in state 1, if the current cell is a ' ', then transition from state 1 to the final state 6 and move the readhead right without changing the contents of the cell. the string is accepted
+            loopRight 1 "*" ++      -- in state 1, if you encounter a *, move the read head right but stay in state 1
+            goRight 1 'a' '*' 2 ++  -- in state 1, if you encounter an a, change it to a *, move the read head right, and go to state 2
+            loopRight 2 "a*" ++     -- in state 2, if you encounter an a or a *, move the read head right but stay in state 2
+            goRight 2 'b' '*' 3 ++  -- in state 2, if you encounter a b, change it to a *, move the read head right, and go to state 3
+            loopRight 3 "b*" ++     -- in state 3, if you encounter a b or a *,  move the read head right but stay in state 3
+            goRight 3 'c' '*' 4 ++  -- in state 3, if you encounter a c, change it to a *, move the read head right, and go to state 4
+            loopRight 4 "c*" ++     -- in state 4, if you encounter a c or a *, move the read head right but stay in state 4
+            checkLeft 4 ' ' 5 ++    -- in state 4, if the current cell is a ' ', then transition from state 4 to state 5 and move the readhead left without changing the contents of the cell
+            loopLeft 5 "abc*" ++    -- in state 5, if you encounter an a, b, c, or *, move the read head left but stay in state 5
+            checkRight 5 '!' 1      -- in state 5, if the current cell is a !, then transition from state 5 to state 1 and move the readhead right without changing the contents of the cell
 
 test = configs tripletm 35 "aabbcc"
-
-main = do 
-  let test = configs addtm 8 "1101+1101=1010"
-  print test
 
 ----------------------------------------------------------------------
 -- recognize language { ww | w in {a,b}* }
@@ -123,46 +119,63 @@ test2 = accepts ww "aa"
 
 
 ----------------------------------------------------------------------
--- recognize {a+b=c | a,b,c in binary & +,=  }
--- recognize binary strings of the form a+b=c where a + b = c
-additionTM =
-  TM [1..14] "01+=" "01+*= " ' ' ' ' trans 1 [14]
-  where
-    trans =
-      -- move right until the end of the input string
-      loopRight 1 "01+=" ++
+-- recognize { a+b=c | a,b,c in binary }
 
-      -- skip over the '=' symbol
-      goRight 1 '=' '*' 2 ++
+additionTM = TM [1..14] "01+=" "01+=*! " ' ' '!' trans 1 [14]
+    where
+      trans = 
+----------------------------------------------
+-- check if string is in correct form a+b=c
+----------------------------------------------
+        checkRight 1 '*' 14 ++     -- in state 1, if the current cell is a *, transition from state 1 to the final state 14 and move the read head right without changing the contents of the cell
+        loopRight 1 "01" ++        -- in state 1, if you encounter a 0 or 1, stay in state 1 and move the read head right without changing the contents of the cells
+        goRight 1 '+' '+' 2 ++     -- in state 1, if you encounter a +, move the read head right and go to state 2 without changing the contents of the cell
+        loopRight 2 "01" ++        -- in state 2, if you encounter a 0 or 1, stay in state 2 and move the read head to the right without changing the contents of the cell
+        goRight 2 '=' '=' 3 ++     -- in state 2, if you encounter an =, move the read head right and go to state 3 without changing the contents of the cell
+        loopRight 3 "01" ++        -- in state 3, if you encounter a 0 or 1, stay the state 3 and move the read head to the right without changing the contents of the cell
+        goLeft 3 ' ' '*' 1         -- in state 3, if you encounter a ' ', this means the TM has reached the end of the input string and did not fail so the input string is in the correct form
+                                   -- to denote that the input string is in the correct form, add a * to the end of the input string
+                                   -- Note: adding a * to the end of the input string also prevents strings like "0", "0+0", and "0+0=" from passing
 
-      -- move left until the '+' symbol is found
-      loopLeft 2 "01+=" ++
-      checkRight 2 '+' 3 ++
+----------------------------------------------
+-- 
 
-      -- move right until the '=' symbol is found
-      loopRight 3 "01+=" ++
-      checkRight 3 '=' 4 ++
+  -- where
+  --   trans =
+  --     -- move right until the end of the input string
+  --     loopRight 1 "01+=" ++
 
-      -- move left until the '+' symbol is found
-      loopLeft 4 "01+=" ++
-      checkRight 4 '+' 5 ++
+  --     -- skip over the '=' symbol
+  --     goRight 1 '=' '*' 2 ++
 
-      -- move right until the end of the input string
-      loopRight 5 "01+=" ++
+  --     -- move left until the '+' symbol is found
+  --     loopLeft 2 "01+=" ++
+  --     checkRight 2 '+' 3 ++
 
-      -- check that the numbers on the left and right sides of the '+' symbol are equal
-      checkRight 5 '0' 6 ++
-      checkRight 5 '1' 7 ++
+  --     -- move right until the '=' symbol is found
+  --     loopRight 3 "01+=" ++
+  --     checkRight 3 '=' 4 ++
 
-      -- if the numbers on the left and right sides of the '+' symbol are equal, then move to the accepting state
-      goRight 6 '0' '*' 14 ++
-      goRight 7 '1' '*' 14 ++
+  --     -- move left until the '+' symbol is found
+  --     loopLeft 4 "01+=" ++
+  --     checkRight 4 '+' 5 ++
 
-      -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
-      goRight 6 '1' '*' 8 ++
-      goRight 7 '0' '*' 8 ++
+  --     -- move right until the end of the input string
+  --     loopRight 5 "01+=" ++
 
-      -- reject state (move to the left until the beginning of the input string is reached)
-      loopLeft 8 "01+="
+  --     -- check that the numbers on the left and right sides of the '+' symbol are equal
+  --     checkRight 5 '0' 6 ++
+  --     checkRight 5 '1' 7 ++
 
-test3 = configs additionTM 35 "1101+1101=1010"
+  --     -- if the numbers on the left and right sides of the '+' symbol are equal, then move to the accepting state
+  --     goRight 6 '0' '*' 14 ++
+  --     goRight 7 '1' '*' 14 ++
+
+  --     -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
+  --     goRight 6 '1' '*' 8 ++
+  --     goRight 7 '0' '*' 8 ++
+
+  --     -- reject state (move to the left until the beginning of the input string is reached)
+  --     loopLeft 8 "01+="
+
+
