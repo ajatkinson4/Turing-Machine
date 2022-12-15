@@ -1,7 +1,6 @@
 module TMExamples where
 
 import MonoTM
-import Data.ByteString (findIndices)
 
 ----------------------------------------------------------------------
 -- recognize {a^n b^n c^n | n in Nat }
@@ -120,67 +119,43 @@ test2 = accepts ww "aa"
 
 ----------------------------------------------------------------------
 -- recognize { a+b=c | a,b,c in binary }
+binaryAdditionTM = TM [1..18] "01+=" "01+=*! " ' ' '!' trans 1 [7,14]
+  where
+    trans = 
+      checkRight 1 ' ' 7  ++
+      checkRight 1 ' ' 14 ++
+      loopRight 1 "*" ++
+      goRight 1 '0' '*' 2 ++
+      goRight 1 '1' '*' 9 ++
+      loopRight 2 "01" ++
+      loopRight 9 "01" ++
+      checkRight 2 '+' 3 ++ 
+      checkRight 9 '+' 10 ++
+      loopRight 3 "*" ++
+      loopRight 10 "*" ++
+      goRight 3 '1' '*' 4 ++
+      goRight 10 '0' '*' 11 ++
+      goRight 3 '0' '*' 15 ++
+      loopRight 4 "01" ++
+      loopRight 11 "01" ++
+      loopRight 15 "01" ++
+      checkRight 4 '=' 5 ++
+      checkRight 11 '=' 12 ++
+      checkRight 15 '=' 16 ++
+      loopRight 5 "*" ++
+      loopRight 12 "*" ++
+      loopRight 16 "*" ++
+      goRight 5 '1' '*' 6 ++
+      goRight 12 '1' '*' 13 ++
+      goRight 16 '0' '*' 17 ++
+      goLeft 6 ' ' '*' 1 ++
+      goLeft 13 ' ' '*' 1 ++
+      goLeft 17 ' ' '*' 1 ++
+      loopLeft 6 "01+=*" ++
+      loopLeft 13 "01+=*" ++
+      loopLeft 17 "01+=*" ++
+      checkRight 6 '!' 1 ++
+      checkRight 13 '!' 1 ++
+      checkRight 17 '!' 1
 
-binaryAdditionTM = TM [1..7] "01+=" "01+=*! " ' ' '!' trans 1 [7]
-    where
-      trans = 
-<<<<<<< HEAD
-
-----------------------------------------------
--- check if string is in correct form a+b=c
-----------------------------------------------
-
-            checkRight 0 ' ' 6  ++
-            loopRight 0 "$" ++
-            goRight 0 '0' '$' 1 ++
-            loopRight 1 "01$" ++
-            checkRight 1 '+' 2 ++ 
-            goRight 2 '1' '$' 3 ++
-            loopRight 3 "01$" ++
-            checkRight 3 '=' 4 ++
-            goRight 4 '1' '$' 5 ++
-            checkLeft 4 '$' 5 ++
-            loopLeft 5 "01+=$" ++
-            checkRight 5 '!' 0
-
--- OLD OLD OLD OLD OLD
-        -- checkRight 1 '*' 14 ++     -- in state 1, if the current cell is a *, transition from state 1 to the final state 14 and move the read head right without changing the contents of the cell
-        -- loopRight 1 "01" ++        -- in state 1, if you encounter a 0 or 1, stay in state 1 and move the read head right without changing the contents of the cells
-        -- goRight 1 '+' '+' 2 ++     -- in state 1, if you encounter a +, move the read head right and go to state 2 without changing the contents of the cell
-        -- loopRight 2 "01" ++        -- in state 2, if you encounter a 0 or 1, stay in state 2 and move the read head to the right without changing the contents of the cell
-        -- goRight 2 '=' '=' 3 ++     -- in state 2, if you encounter an =, move the read head right and go to state 3 without changing the contents of the cell
-        -- loopRight 3 "01" ++        -- in state 3, if you encounter a 0 or 1, stay the state 3 and move the read head to the right without changing the contents of the cell
-        -- goLeft 3 ' ' '*' 1         -- in state 3, if you encounter a ' ', this means the TM has reached the end of the input string and did not fail so the input string is in the correct form
-                                   -- to denote that the input string is in the correct form, add a * to the end of the input string
-                                   -- Note: adding a * to the end of the input string also prevents strings like "0", "0+0", and "0+0=" from passing
-
-----------------------------------------------
--- convert 
-
-
-
-
-
-
-=======
-        checkRight 1 ' ' 7  ++
-        loopRight 1 "*" ++
-        goRight 1 '0' '*' 2 ++
-
-        loopRight 2 "01*" ++
-        checkRight 2 '+' 3 ++ 
-
-        loopRight 3 "*" ++
-        goRight 3 '1' '*' 4 ++
-        loopRight 4 "01*" ++
-        checkRight 4 '=' 5 ++
-        loopRight 5 "*" ++
-
-        goRight 5 '1' '*' 6 ++
-        goLeft 6 ' ' '*' 1 ++
-        loopLeft 6 "01+=*" ++
-        checkRight 6 '!' 1
-
-test4 = accepts binaryAdditionTM "000+111=111"
-test5 = accepts binaryAdditionTM "111+000=111"
->>>>>>> b67ea8bc0e2855667bb52caec9507e5d7c1fd2c0
+test3 = configs binaryAdditionTM 50 "000+101=101"
