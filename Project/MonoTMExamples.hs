@@ -119,27 +119,69 @@ test2 = accepts ww "aa"
 
 ----------------------------------------------------------------------
 -- recognize { a+b=c | a,b,c in binary }
+-- binaryAdditionTM = TM [1..7] "01+=" "01+=*! " ' ' '!' trans 1 [7]
+--     where
+--       trans = 
+--         checkRight 1 ' ' 7  ++
+--         loopRight 1 "*" ++
+--         goRight 1 '0' '*' 2 ++
 
-binaryAdditionTM = TM [1..7] "01+=" "01+=*! " ' ' '!' trans 1 [7]
-    where
-      trans = 
-        checkRight 1 ' ' 7  ++
-        loopRight 1 "*" ++
-        goRight 1 '0' '*' 2 ++
+--         loopRight 2 "01*" ++
+--         checkRight 2 '+' 3 ++ 
 
-        loopRight 2 "01*" ++
-        checkRight 2 '+' 3 ++ 
+--         loopRight 3 "*" ++
+--         goRight 3 '1' '*' 4 ++
+--         loopRight 4 "01*" ++
+--         checkRight 4 '=' 5 ++
+--         loopRight 5 "*" ++
 
-        loopRight 3 "*" ++
-        goRight 3 '1' '*' 4 ++
-        loopRight 4 "01*" ++
-        checkRight 4 '=' 5 ++
-        loopRight 5 "*" ++
+--         goRight 5 '1' '*' 6 ++
+--         goLeft 6 ' ' '*' 1 ++
+--         loopLeft 6 "01+=*" ++
+--         checkRight 6 '!' 1
 
-        goRight 5 '1' '*' 6 ++
-        goLeft 6 ' ' '*' 1 ++
-        loopLeft 6 "01+=*" ++
-        checkRight 6 '!' 1
+-- test4 = accepts binaryAdditionTM "000+111=111"
+-- test5 = accepts binaryAdditionTM "111+000=000"
 
-test4 = accepts binaryAdditionTM "000+111=111"
+binaryAdditionTM = TM [1..18] "01+=" "01+=! " ' ' '!' trans 1 [7,14]
+  where
+    trans = 
+      checkRight 1 ' ' 7  ++
+      checkRight 1 ' ' 14 ++
+      loopRight 1 "$" ++
+      goRight 1 '0' '$' 2 ++
+      goRight 1 '1' '$' 9 ++
+      loopRight 2 "01" ++
+      loopRight 9 "01" ++
+      checkRight 2 '+' 3 ++ 
+      checkRight 9 '+' 10 ++
+      loopRight 3 "$" ++
+      loopRight 10 "$" ++
+      goRight 3 '1' '$' 4 ++
+      goRight 10 '0' '$' 11 ++
+      goRight 3 '0' '$' 15 ++
+      loopRight 4 "01" ++
+      loopRight 11 "01" ++
+      loopRight 15 "01" ++
+      checkRight 4 '=' 5 ++
+      checkRight 11 '=' 12 ++
+      checkRight 15 '=' 16 ++
+      loopRight 5 "$" ++
+      loopRight 12 "$" ++
+      loopRight 16 "$" ++
+      goRight 5 '1' '$' 6 ++
+      goRight 12 '1' '$' 13 ++
+      goRight 16 '0' '$' 17 ++
+      goLeft 6 ' ' '$' 1 ++
+      goLeft 13 ' ' '$' 1 ++
+      goLeft 17 ' ' '$' 1 ++
+      loopLeft 6 "01+=$" ++
+      loopLeft 13 "01+=$" ++
+      loopLeft 17 "01+=$" ++
+      checkRight 6 '!' 1 ++
+      checkRight 13 '!' 1 ++
+      checkRight 17 '!' 1
+
+test4 = accepts binaryAdditionTM "000+111=101"
 test5 = accepts binaryAdditionTM "111+000=111"
+test6 = accepts binaryAdditionTM "111+000=101"
