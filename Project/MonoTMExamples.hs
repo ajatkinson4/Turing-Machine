@@ -120,61 +120,26 @@ test2 = accepts ww "aa"
 ----------------------------------------------------------------------
 -- recognize { a+b=c | a,b,c in binary }
 
-additionTM = TM [1..14] "01+=" "01+=*! " ' ' '!' trans 1 [14]
+binaryAdditionTM = TM [1..7] "01+=" "01+=*! " ' ' '!' trans 1 [7]
     where
       trans = 
-----------------------------------------------
--- check if string is in correct form a+b=c
-----------------------------------------------
-        checkRight 1 '*' 14 ++     -- in state 1, if the current cell is a *, transition from state 1 to the final state 14 and move the read head right without changing the contents of the cell
-        loopRight 1 "01" ++        -- in state 1, if you encounter a 0 or 1, stay in state 1 and move the read head right without changing the contents of the cells
-        goRight 1 '+' '+' 2 ++     -- in state 1, if you encounter a +, move the read head right and go to state 2 without changing the contents of the cell
-        loopRight 2 "01" ++        -- in state 2, if you encounter a 0 or 1, stay in state 2 and move the read head to the right without changing the contents of the cell
-        goRight 2 '=' '=' 3 ++     -- in state 2, if you encounter an =, move the read head right and go to state 3 without changing the contents of the cell
-        loopRight 3 "01" ++        -- in state 3, if you encounter a 0 or 1, stay the state 3 and move the read head to the right without changing the contents of the cell
-        goLeft 3 ' ' '*' 1         -- in state 3, if you encounter a ' ', this means the TM has reached the end of the input string and did not fail so the input string is in the correct form
-                                   -- to denote that the input string is in the correct form, add a * to the end of the input string
-                                   -- Note: adding a * to the end of the input string also prevents strings like "0", "0+0", and "0+0=" from passing
+        checkRight 1 ' ' 7  ++
+        loopRight 1 "*" ++
+        goRight 1 '0' '*' 2 ++
 
-----------------------------------------------
--- 
+        loopRight 2 "01*" ++
+        checkRight 2 '+' 3 ++ 
 
-  -- where
-  --   trans =
-  --     -- move right until the end of the input string
-  --     loopRight 1 "01+=" ++
+        loopRight 3 "*" ++
+        goRight 3 '1' '*' 4 ++
+        loopRight 4 "01*" ++
+        checkRight 4 '=' 5 ++
+        loopRight 5 "*" ++
 
-  --     -- skip over the '=' symbol
-  --     goRight 1 '=' '*' 2 ++
+        goRight 5 '1' '*' 6 ++
+        goLeft 6 ' ' '*' 1 ++
+        loopLeft 6 "01+=*" ++
+        checkRight 6 '!' 1
 
-  --     -- move left until the '+' symbol is found
-  --     loopLeft 2 "01+=" ++
-  --     checkRight 2 '+' 3 ++
-
-  --     -- move right until the '=' symbol is found
-  --     loopRight 3 "01+=" ++
-  --     checkRight 3 '=' 4 ++
-
-  --     -- move left until the '+' symbol is found
-  --     loopLeft 4 "01+=" ++
-  --     checkRight 4 '+' 5 ++
-
-  --     -- move right until the end of the input string
-  --     loopRight 5 "01+=" ++
-
-  --     -- check that the numbers on the left and right sides of the '+' symbol are equal
-  --     checkRight 5 '0' 6 ++
-  --     checkRight 5 '1' 7 ++
-
-  --     -- if the numbers on the left and right sides of the '+' symbol are equal, then move to the accepting state
-  --     goRight 6 '0' '*' 14 ++
-  --     goRight 7 '1' '*' 14 ++
-
-  --     -- if the numbers on the left and right sides of the '+' symbol are not equal, then move to the rejecting state
-  --     goRight 6 '1' '*' 8 ++
-  --     goRight 7 '0' '*' 8 ++
-
-  --     -- reject state (move to the left until the beginning of the input string is reached)
-  --     loopLeft 8 "01+="
-
-
+test4 = accepts binaryAdditionTM "000+111=111"
+test5 = accepts binaryAdditionTM "111+000=111"
