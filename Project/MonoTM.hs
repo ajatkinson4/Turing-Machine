@@ -4,6 +4,8 @@ import Data.List
 import GvShow
 import Util
 
+import Data.Char (digitToInt)
+
 data Direction = GoLeft | GoRight
 
 instance Show Direction where
@@ -196,3 +198,20 @@ writeGraphViz filename d =
 writeGraphVizN :: String -> TM -> IO ()
 writeGraphVizN filename d =
   writeFile filename (toGraphViz True d)
+
+boolBinToDec :: [Bool] -> Int
+boolBinToDec = foldr (\x y -> fromEnum x + 2*y) 0
+
+binToDec :: Integral i => i -> Maybe i
+binToDec 0 = Just 0
+binToDec i | last < 2 = fmap (\x -> 2*x + last) (binToDec (div i 10))
+           | otherwise = Nothing
+    where last = mod i 10
+
+
+-- thoughts on adding binary numbers:
+-- after the TM confirms the string is in the correct form a+b=c, use 1 call in the TM to check if the numbers are equal 
+check :: String -> [Int]
+check s = map digitToInt s
+
+
