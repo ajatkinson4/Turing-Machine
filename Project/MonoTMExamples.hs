@@ -121,9 +121,10 @@ test2 = accepts ww "aa"
 ----------------------------------------------------------------------
 -- recognize { a+b=c | a,b,c in binary }
 
-additionTM = TM [1..14] "01+=" "01+=*! " ' ' '!' trans 1 [14]
+binaryAdditionTM = TM [1..7] "01+=" "01+=*! " ' ' '!' trans 1 [7]
     where
       trans = 
+<<<<<<< HEAD
 
 ----------------------------------------------
 -- check if string is in correct form a+b=c
@@ -161,3 +162,25 @@ additionTM = TM [1..14] "01+=" "01+=*! " ' ' '!' trans 1 [14]
 
 
 
+=======
+        checkRight 1 ' ' 7  ++
+        loopRight 1 "*" ++
+        goRight 1 '0' '*' 2 ++
+
+        loopRight 2 "01*" ++
+        checkRight 2 '+' 3 ++ 
+
+        loopRight 3 "*" ++
+        goRight 3 '1' '*' 4 ++
+        loopRight 4 "01*" ++
+        checkRight 4 '=' 5 ++
+        loopRight 5 "*" ++
+
+        goRight 5 '1' '*' 6 ++
+        goLeft 6 ' ' '*' 1 ++
+        loopLeft 6 "01+=*" ++
+        checkRight 6 '!' 1
+
+test4 = accepts binaryAdditionTM "000+111=111"
+test5 = accepts binaryAdditionTM "111+000=111"
+>>>>>>> b67ea8bc0e2855667bb52caec9507e5d7c1fd2c0
